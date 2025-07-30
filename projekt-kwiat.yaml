@@ -1,0 +1,298 @@
+substitutions:
+  device_name: projekt-kwiat
+  friendly_name: Projekt kwiat
+  log_level: debug
+  sleep_time: 30s
+  run_time: 20s
+  wake_up_pin: GPIO3
+  device_ip: 192.168.21.111
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: -100.0
+    then:
+      - delay: 1s
+      - script.execute: test_ota
+
+wifi:
+  manual_ip:
+    static_ip: ${device_ip}
+    gateway: 192.168.21.1
+    subnet: 255.255.255.0
+  ssid: !secret not_ssid
+  password: !secret not_password
+
+  ap:
+    ssid: ${device_name} Hotspot
+    password: !secret not_password
+
+captive_portal:
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+logger:
+  level: ${log_level}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+#################################################
+# info
+#   light - BH1750
+#   ambient - bme280
+#   moisture - HW-390
+#   wake-up button - GPIO3
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#################################################
+# main
+i2c:
+  sda: GPIO8
+  scl: GPIO9
+  scan: true
+
+button:
+  - platform: restart
+    name: ${device_name} Restart
+
+binary_sensor:
+  - platform: status
+    name: ${device_name} Status
+  - platform: homeassistant
+    id: otamode
+    entity_id: input_boolean.esphome_ota_mode
+
+text:
+  - platform: template
+    name: ${friendly_name} flower name
+    id: flower_name
+    restore_value: true
+    optimistic: true
+    icon: mdi:rename-outline
+    max_length: 32
+    mode: text
+    on_value:
+      then:
+        - logger.log:
+            format: "%s"
+            args: ["x.c_str()"]
+
+number:
+  - platform: template
+    name: ${friendly_name} min moisture
+    id: min_moisture
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    unit_of_measurement: "%"
+    icon: mdi:watering-can-outline
+  - platform: template
+    name: ${friendly_name} max moisture
+    id: max_moisture
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    unit_of_measurement: "%"
+    icon: mdi:watering-can
+  - platform: template
+    name: ${friendly_name} min humidity
+    id: min_humidity
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    unit_of_measurement: "%"
+    icon: mdi:water-outline
+  - platform: template
+    name: ${friendly_name} max humidity
+    id: max_humidity
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 5
+    unit_of_measurement: "%"
+    icon: mdi:water
+  - platform: template
+    name: ${friendly_name} min temperature
+    id: min_temperature
+    restore_value: true
+    optimistic: true
+    min_value: -10
+    max_value: 100
+    step: 5
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer-chevron-down
+  - platform: template
+    name: ${friendly_name} max temperature
+    id: max_temperature
+    restore_value: true
+    optimistic: true
+    min_value: -10
+    max_value: 100
+    step: 5
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer-chevron-up
+  - platform: template
+    name: ${friendly_name} min illuminance
+    id: min_illuminance
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 1000
+    step: 10
+    unit_of_measurement: "lx"
+    icon: mdi:weather-sunset-down
+  - platform: template
+    name: ${friendly_name} max illuminance
+    id: max_illuminance
+    restore_value: true
+    optimistic: true
+    min_value: 0
+    max_value: 1000
+    step: 10
+    unit_of_measurement: "lx"
+    icon: mdi:weather-sunset-up
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name} IP Address
+    ssid:
+      name: ${friendly_name} SSID
+    mac_address:
+      name: ${friendly_name} Mac Address
+    dns_address:
+      name: ${friendly_name} DNS Address
+  - platform: template
+    name: "${friendly_name} Uptime"
+    id: uptime_formatted
+    update_interval: 10s
+    lambda: |-
+      uint32_t seconds = id(uptime_raw).state;
+      char buffer[16];
+      if (seconds < 60) {
+        sprintf(buffer, "%us", seconds);
+      } else if (seconds < 3600) {
+        sprintf(buffer, "%um", seconds / 60);
+      } else if (seconds < 86400) {
+        sprintf(buffer, "%uh", seconds / 3600);
+      } else {
+        sprintf(buffer, "%ud", seconds / 86400);
+      }
+      return std::string(buffer);
+
+sensor:
+  - platform: uptime
+    name: ${friendly_name} Uptime Raw
+    id: uptime_raw
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal
+    update_interval: 10s
+
+  - platform: bme280_i2c
+    temperature:
+      name: ${friendly_name} Temperature
+      id: bme280_temperature
+    pressure:
+      name: ${friendly_name} Pressure
+      id: bme280_pressure
+    humidity:
+      name: ${friendly_name} Relative Humidity
+      id: bme280_humidity
+    address: 0x76
+    update_interval: 5s
+  - platform: absolute_humidity
+    name: ${friendly_name} Absolute Humidity
+    temperature: bme280_temperature
+    humidity: bme280_humidity
+
+  - platform: bh1750
+    name: ${friendly_name} Illuminance
+    address: 0x23
+    update_interval: 5s
+
+  - platform: adc
+    pin: GPIO0
+    name: ${device_name} Soil Moisture
+    update_interval: 5s
+    unit_of_measurement: "%"
+    attenuation: 11db
+    filters:
+    - calibrate_linear:
+        - 1.5 -> 100.00
+        - 2.74 -> 0.00
+    - clamp:
+        min_value: 0
+        max_value: 100
+
+  - platform: adc
+    pin: GPIO4
+    attenuation: auto
+    name: ${device_name} Battery Voltage
+    icon: mdi:battery-charging-high
+    id: battery
+    update_interval: 5s
+    accuracy_decimals: 2
+    filters:
+      - multiply: 1.735
+      - median:
+          window_size: 10
+          send_every: 5
+          send_first_at: 5
+  - platform: template
+    name: ${device_name} Battery
+    icon: mdi:battery-medium
+    unit_of_measurement: '%'
+    update_interval: 5s
+    accuracy_decimals: 0
+    filters:
+      - clamp:
+          min_value: 0
+          max_value: 100
+    lambda: |-
+      return ((id(battery).state-3) /1.2 * 100.00);
+
+deep_sleep:
+  id: deep_sleep_handler
+  run_duration: ${run_time}
+  sleep_duration: ${sleep_time}
+  wakeup_pin: ${wake_up_pin}
+  wakeup_pin_mode: INVERT_WAKEUP
+
+script:
+  - id: test_ota
+    mode: queued
+    then:
+      - logger.log: "Checking OTA Mode"
+      - if:
+          condition:
+            binary_sensor.is_on: otamode
+          then:
+            - logger.log: 'OTA Mode ON'
+            - deep_sleep.prevent: deep_sleep_handler
+          else:
+            - logger.log: 'OTA Mode OFF'
+      - delay: 2s
+      - script.execute: test_ota
