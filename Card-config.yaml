@@ -1,0 +1,354 @@
+type: vertical-stack
+cards:
+  - type: custom:mushroom-template-card
+    primary: "{{ states('text.projekt_kwiat_projekt_kwiat_flower_name') }}"
+    secondary: Office
+    icon: mdi:flower
+    badge_icon: ""
+    fill_container: false
+    multiline_secondary: false
+    entity: text.projekt_kwiat_projekt_kwiat_flower_name
+    icon_color: "#babbf1"
+    tap_action:
+      action: none
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+  - type: custom:swipe-card
+    parameters:
+      allowTouchMove: false
+      effect: coverflow
+      pagination:
+        enable: true
+        clickable: true
+        dynamicBullets: true
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: sensor.projekt_kwiat_projekt_kwiat_soil_moisture
+                layout: vertical
+                fill_container: false
+                primary_info: name
+                icon_type: icon
+                name: Moisture
+                icon: mdi:water
+                icon_color: none
+                card_mod:
+                  style: |
+                    :host {
+                      --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_soil_moisture') | float %}
+                                             {% set min = states('number.projekt_kwiat_projekt_kwiat_min_moisture') | float %}
+                                             {% set max = states('number.projekt_kwiat_projekt_kwiat_max_moisture') | float %}
+                                             {% if val < min or val > max %}
+                                               var(--error-color)
+                                             {% else %}
+                                               var(--success-color)
+                                             {% endif %};
+                    }
+                    ha-state-icon {
+                      --icon-symbol-size: 35px;
+                      margin-top: 5px
+                    }
+              - type: custom:mushroom-entity-card
+                entity: sensor.projekt_kwiat_projekt_kwiat_relative_humidity
+                layout: vertical
+                fill_container: false
+                primary_info: name
+                icon_type: icon
+                name: Humidity
+                secondary_info: state
+                icon_color: none
+                card_mod:
+                  style: |
+                    :host {
+                      --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_relative_humidity') | float %}
+                                             {% set min = states('number.projekt_kwiat_projekt_kwiat_min_humidity') | float %}
+                                             {% set max = states('number.projekt_kwiat_projekt_kwiat_max_humidity') | float %}
+                                             {% if val < min or val > max %}
+                                               var(--error-color)
+                                             {% else %}
+                                               var(--success-color)
+                                             {% endif %};
+                    }
+                    ha-state-icon {
+                      --icon-symbol-size: 35px;
+                      margin-top: 5px
+                    }
+              - type: custom:mushroom-entity-card
+                entity: sensor.projekt_kwiat_projekt_kwiat_temperature
+                layout: vertical
+                fill_container: false
+                primary_info: name
+                icon_type: icon
+                name: Temperture
+                icon_color: none
+                card_mod:
+                  style: |
+                    :host {
+                      --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_temperature') | float %}
+                                             {% set min = states('number.projekt_kwiat_projekt_kwiat_min_temperature') | float %}
+                                             {% set max = states('number.projekt_kwiat_projekt_kwiat_max_temperature') | float %}
+                                             {% if val < min or val > max %}
+                                               var(--error-color)
+                                             {% else %}
+                                               var(--success-color)
+                                             {% endif %};
+                    }
+                    ha-state-icon {
+                      --icon-symbol-size: 30px;
+                      margin-top: 5px
+                    }
+              - type: custom:mushroom-entity-card
+                layout: vertical
+                fill_container: false
+                primary_info: name
+                icon_type: icon
+                entity: sensor.projekt_kwiat_projekt_kwiat_illuminance
+                name: Illuminance
+                icon_color: none
+                card_mod:
+                  style: |
+                    :host {
+                      {% set val = states('sensor.projekt_kwiat_projekt_kwiat_illuminance') | float %}
+                      {% set min = states('number.projekt_kwiat_projekt_kwiat_min_illuminance') | float %}
+                      {% set max = states('number.projekt_kwiat_projekt_kwiat_max_illuminance') | float %}
+                      {% set solar = states('sensor.power_production_now') | float(0) %}
+
+                      {% if (val < min or val > max) and solar > 500 %}
+                        --card-mod-icon-color: var(--error-color);
+                      {% else %}
+                        --card-mod-icon-color: var(--success-color);
+                      {% endif %}
+                    }
+                    ha-state-icon {
+                      --icon-symbol-size: 30px;
+                      margin-top: 5px;
+                    }
+          - type: vertical-stack
+            cards:
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mini-graph-card
+                    entities:
+                      - entity: sensor.projekt_kwiat_projekt_kwiat_soil_moisture
+                        name: Moisture
+                    name: Moisture
+                    icon: mdi:water
+                    points_per_hour: 6
+                    hours_to_show: 6
+                    line_color: "#babbf1"
+                    show:
+                      state: false
+                    card_mod:
+                      style: |
+                        :host {
+                          --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_soil_moisture') | float %}
+                                                 {% set min = states('number.projekt_kwiat_projekt_kwiat_min_moisture') | float %}
+                                                 {% set max = states('number.projekt_kwiat_projekt_kwiat_max_moisture') | float %}
+                                                 {% if val < min or val > max %}
+                                                   var(--error-color)
+                                                 {% else %}
+                                                   var(--success-color)
+                                                 {% endif %};
+                        }
+                  - type: custom:mini-graph-card
+                    entities:
+                      - entity: sensor.projekt_kwiat_projekt_kwiat_relative_humidity
+                        name: Humidity
+                    name: Humidity
+                    points_per_hour: 6
+                    hours_to_show: 6
+                    line_color: "#babbf1"
+                    show:
+                      state: false
+                    card_mod:
+                      style: |
+                        :host {
+                          --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_relative_humidity') | float %}
+                                                 {% set min = states('number.projekt_kwiat_projekt_kwiat_min_humidity') | float %}
+                                                 {% set max = states('number.projekt_kwiat_projekt_kwiat_max_humidity') | float %}
+                                                 {% if val < min or val > max %}
+                                                   var(--error-color)
+                                                 {% else %}
+                                                   var(--success-color)
+                                                 {% endif %};
+                        }
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mini-graph-card
+                    entities:
+                      - entity: sensor.projekt_kwiat_projekt_kwiat_temperature
+                        name: Temperature
+                    name: Temperature
+                    points_per_hour: 6
+                    hours_to_show: 6
+                    line_color: "#babbf1"
+                    show:
+                      state: false
+                    card_mod:
+                      style: |
+                        :host {
+                          --card-mod-icon-color: {% set val = states('sensor.projekt_kwiat_projekt_kwiat_temperature') | float %}
+                                                 {% set min = states('number.projekt_kwiat_projekt_kwiat_min_temperature') | float %}
+                                                 {% set max = states('number.projekt_kwiat_projekt_kwiat_max_temperature') | float %}
+                                                 {% if val < min or val > max %}
+                                                   var(--error-color)
+                                                 {% else %}
+                                                   var(--success-color)
+                                                 {% endif %};
+                        }
+                  - type: custom:mini-graph-card
+                    entities:
+                      - entity: sensor.projekt_kwiat_projekt_kwiat_illuminance
+                        name: Illuminance
+                    name: Illuminance
+                    points_per_hour: 6
+                    hours_to_show: 6
+                    line_color: "#babbf1"
+                    show:
+                      state: false
+                    card_mod:
+                      style: |
+                        :host {
+                          {% set val = states('sensor.projekt_kwiat_projekt_kwiat_illuminance') | float %}
+                          {% set min = states('number.projekt_kwiat_projekt_kwiat_min_illuminance') | float %}
+                          {% set max = states('number.projekt_kwiat_projekt_kwiat_max_illuminance') | float %}
+                          {% set solar = states('sensor.power_production_now') | float(0) %}
+
+                          {% if (val < min or val > max) and solar > 500 %}
+                            --card-mod-icon-color: var(--error-color);
+                          {% else %}
+                            --card-mod-icon-color: var(--success-color);
+                          {% endif %}
+                        }
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - graph: none
+                type: sensor
+                entity: sensor.projekt_kwiat_projekt_kwiat_wifi_signal
+                detail: 1
+                name: " "
+              - type: entity
+                entity: sensor.projekt_kwiat_projekt_kwiat_uptime
+                name: " "
+          - type: horizontal-stack
+            cards:
+              - type: entity
+                entity: update.plant_firmware
+                icon: mdi:alarm-light
+                name: Action needed
+      - type: vertical-stack
+        cards:
+          - type: custom:love-lock-card
+            popup: confirm
+            cards:
+              - type: custom:mushroom-entity-card
+                entity: text.projekt_kwiat_projekt_kwiat_flower_name
+                name: Tap to change name
+                tap_action:
+                  action: more-info
+                layout: horizontal
+                icon_color: "#babbf1"
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-title-card
+                title: min values
+              - type: custom:mushroom-title-card
+                title: max values
+          - type: horizontal-stack
+            cards:
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_min_temperature
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_max_temperature
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+          - type: horizontal-stack
+            cards:
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_min_humidity
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_max_humidity
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+          - type: horizontal-stack
+            cards:
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_min_illuminance
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_max_illuminance
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+          - type: horizontal-stack
+            cards:
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_min_moisture
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+              - type: custom:love-lock-card
+                popup: confirm
+                cards:
+                  - type: custom:mushroom-number-card
+                    entity: number.projekt_kwiat_projekt_kwiat_max_moisture
+                    layout: horizontal
+                    primary_info: state
+                    secondary_info: none
+                    fill_container: false
+                    icon_color: "#babbf1"
+          - type: custom:gap-card
+grid_options:
+  rows: 1
